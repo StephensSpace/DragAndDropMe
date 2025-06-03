@@ -5,13 +5,14 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-home',
   imports: [],
-  providers: [FirebaseService, Router],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-  private firestore = Inject(FirebaseService);
-  private router = Inject(Router);
+   constructor(
+    private firestore: FirebaseService,
+    private router: Router
+  ) {}
 
 
 startLobby() {

@@ -1,41 +1,34 @@
 import { Injectable } from '@angular/core';
-import { getFirestore, onSnapshot } from 'firebase/firestore';
-import { Firestore, collection, collectionData, doc, docData, addDoc } from '@angular/fire/firestore';
-import { initializeApp } from 'firebase/app';
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBOCpbiUFSX1AWQPW5k3dgu6z5nBDNx7YI",
-    authDomain: "drag-and-drop-me.firebaseapp.com",
-    projectId: "drag-and-drop-me",
-    storageBucket: "drag-and-drop-me.firebasestorage.app",
-    messagingSenderId: "899149559923",
-    appId: "1:899149559923:web:4724b89cd90dc21ec61206"
-};
-
-// Firebase einmal initialisieren und exportieren
-const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
+import { Firestore, collection, addDoc, doc } from '@angular/fire/firestore';
+import { onSnapshot } from 'firebase/firestore';
+import { Router } from '@angular/router';
+import { Game } from '../../models/game';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class FirebaseService {
+  constructor(
+    private firestore: Firestore,
+    private router: Router,
+  ) {}
 
-    // Zugriff auf Firestore über diese Property
-    firestore = firestore;
+  async createLobby(): Promise<string> {
+    const newGame = new Game(); // Instanz mit Standardwerten
+    const docRef = await addDoc(collection(this.firestore, 'Games'), newGame.toJson());
+    return docRef.id;
+  }
 
-    constructor() { }
-    async createLobby(): Promise<string> {
-        // generiere Lobby-Dokument mit automatischer ID und evtl. Standarddaten
-        const docRef = await addDoc(collection(this.firestore, 'Games'), { /* default data */ });
-        return docRef.id; // zurückgeben für URL etc.
-    }
-
-    subscribeLobby(lobbyId: string, callback: Function) {
-        const lobbyDoc = doc(this.firestore, 'Games', lobbyId);
-        return onSnapshot(lobbyDoc, (docSnap) => {
-            callback(docSnap.data());
-        });
-    }
-
+  subscribeToGame(gameId: string, callback: (data: any) => void): () => void {
+    const gameDoc = doc(this.firestore, 'Games', gameId);
+    const unsubscribe = onSnapshot(gameDoc, (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data());
+      } else {
+        console.warn('Spiel nicht gefunden!');
+        this.router.navigate(['/']);
+      }
+    });
+    return unsubscribe;
+  }
 }
