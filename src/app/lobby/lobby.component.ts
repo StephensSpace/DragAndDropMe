@@ -2,15 +2,18 @@ import { Component } from '@angular/core';
 import { FirebaseService } from '../services/FirebaseService/Firebase';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '../models/game';
+import { OverlayUrlComponent } from '../overlay-url/overlay-url.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-lobby',
-  imports: [],
+  imports: [OverlayUrlComponent, CommonModule],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss'
 })
 export class LobbyComponent {
   private unsubscribeFn?: () => void;
+  overlayVisible: boolean = false;
   gameData: Game | undefined;
   ID: string = "";
 
@@ -32,13 +35,17 @@ export class LobbyComponent {
     this.unsubscribeFn = this.firestore.subscribeToGame(gameId, (data) => {
       console.log('Empfangene Spieldaten:', data, 'empfangeneID:', this.ID); // hier werden die Daten geloggt
       this.gameData = data; // falls du die Daten im Template brauchst
+      this.toggleOverlay();
     });
+  }
+
+  toggleOverlay() {
+    this.overlayVisible = !this.overlayVisible;
   }
 
   ngOnDestroy(): void {
     if (this.unsubscribeFn) {
       this.unsubscribeFn(); // sauber vom Listener abmelden beim Verlassen der Komponente
     }
-  }
-    
+  } 
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, doc } from '@angular/fire/firestore';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, updateDoc } from 'firebase/firestore';
 import { Router } from '@angular/router';
 import { Game } from '../../models/game';
 
@@ -11,7 +11,7 @@ export class FirebaseService {
   constructor(
     private firestore: Firestore,
     private router: Router,
-  ) {}
+  ) { }
 
   async createLobby(): Promise<string> {
     const newGame = new Game(); // Instanz mit Standardwerten
@@ -30,5 +30,10 @@ export class FirebaseService {
       }
     });
     return unsubscribe;
+  }
+
+  updateGameData(gameId: string, updatedGame: Game): Promise<void> {
+    const gameDoc = doc(this.firestore, 'Games', gameId);
+    return updateDoc(gameDoc, updatedGame.toJson());
   }
 }

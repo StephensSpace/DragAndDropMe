@@ -1,1 +1,6 @@
 <p>lobby works!</p>
+<app-overlay-url 
+*ngIf="overlayVisible"
+[gameId]="ID" 
+(close)="toggleOverlay()">
+</app-overlay-url>
