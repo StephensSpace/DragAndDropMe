@@ -13,16 +13,17 @@ import { CommonModule } from '@angular/common';
 })
 export class LobbyComponent {
   private unsubscribeFn?: () => void;
+  currentPlayerIndex: number = -1;
   overlayVisible: boolean = false;
   gameData: Game | undefined;
   ID: string = "";
 
-    constructor(private firestore: FirebaseService,
-        private router: Router,
-        private route: ActivatedRoute
-    ) {}
+  constructor(private firestore: FirebaseService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) { }
 
-     ngOnInit(): void {
+  ngOnInit(): void {
     // gameId aus der URL holen
     const gameId = this.route.snapshot.paramMap.get('id');
     if (!gameId) {
@@ -35,7 +36,11 @@ export class LobbyComponent {
     this.unsubscribeFn = this.firestore.subscribeToGame(gameId, (data) => {
       console.log('Empfangene Spieldaten:', data, 'empfangeneID:', this.ID); // hier werden die Daten geloggt
       this.gameData = data; // falls du die Daten im Template brauchst
-      this.toggleOverlay();
+      this.assignPlayerRole(this.gameData!);
+      // Overlay nur für Player 1 zeigen (currentPlayerIndex == 0)
+      if (this.currentPlayerIndex === 0) {
+        this.toggleOverlay();
+      }
     });
   }
 
@@ -43,9 +48,19 @@ export class LobbyComponent {
     this.overlayVisible = !this.overlayVisible;
   }
 
+  assignPlayerRole(gameData: Game) {
+    for (let i = 0; i < gameData.players.length; i++) {
+      if (!gameData.players[i].inLobby) {
+        this.currentPlayerIndex = i;
+        this.firestore.updateGameDataField(this.ID, `players.${i}.inLobby`, true);
+        return;
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.unsubscribeFn) {
       this.unsubscribeFn(); // sauber vom Listener abmelden beim Verlassen der Komponente
     }
-  } 
+  }
 }

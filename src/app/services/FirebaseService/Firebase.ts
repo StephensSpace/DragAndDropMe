@@ -32,8 +32,8 @@ export class FirebaseService {
     return unsubscribe;
   }
 
-  updateGameData(gameId: string, updatedGame: Game): Promise<void> {
-    const gameDoc = doc(this.firestore, 'Games', gameId);
-    return updateDoc(gameDoc, updatedGame.toJson());
-  }
+  updateGameDataField (gameId: string, fieldPath: string, value: any) {
+  const gameDoc = doc(this.firestore, 'Games', gameId);
+  return updateDoc(gameDoc, { [fieldPath]: value });
+}
 }
