@@ -4,10 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Game } from '../models/game';
 import { OverlayUrlComponent } from '../overlay-url/overlay-url.component';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-lobby',
-  imports: [OverlayUrlComponent, CommonModule],
+  imports: [OverlayUrlComponent, CommonModule, FormsModule],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss'
 })
@@ -17,6 +18,7 @@ export class LobbyComponent {
   overlayVisible: boolean = false;
   gameData: Game | undefined;
   ID: string = "";
+  localName: string = '';
 
   constructor(private firestore: FirebaseService,
     private router: Router,
@@ -37,12 +39,16 @@ export class LobbyComponent {
       console.log('Empfangene Spieldaten:', data, 'empfangeneID:', this.ID); // hier werden die Daten geloggt
       this.gameData = data; // falls du die Daten im Template brauchst
       this.assignPlayerRole(this.gameData!);
-      // Overlay nur für Player 1 zeigen (currentPlayerIndex == 0)
-      if (this.currentPlayerIndex === 0) {
-        this.toggleOverlay();
-      }
-    });
+      
+      //if (this.currentPlayerIndex === 0) {
+       // this.toggleOverlay();
+      //}
+    }); 
   }
+
+  saveName(i: number) {
+  this.firestore.updateGameDataField(this.ID, `players.${i}.name`, this.localName);
+}
 
   toggleOverlay() {
     this.overlayVisible = !this.overlayVisible;
@@ -53,6 +59,7 @@ export class LobbyComponent {
       if (!gameData.players[i].inLobby) {
         this.currentPlayerIndex = i;
         this.firestore.updateGameDataField(this.ID, `players.${i}.inLobby`, true);
+        this.localName = gameData.players[i].name;
         return;
       }
     }
@@ -63,4 +70,6 @@ export class LobbyComponent {
       this.unsubscribeFn(); // sauber vom Listener abmelden beim Verlassen der Komponente
     }
   }
+
+  
 }

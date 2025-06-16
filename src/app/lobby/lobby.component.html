@@ -1,6 +1,20 @@
 <p>lobby works!</p>
+
+
 <app-overlay-url 
 *ngIf="overlayVisible"
 [gameId]="ID" 
 (close)="toggleOverlay()">
 </app-overlay-url>
+
+
+<div *ngFor="let p of gameData?.players; let i = index">
+  <input
+    type="text"
+    [readonly]="i !== currentPlayerIndex"
+    [ngModel]="i === currentPlayerIndex ? localName : p.name"
+    (ngModelChange)="i === currentPlayerIndex ? localName = $event : null"
+    (blur)="i === currentPlayerIndex ? saveName(i) : null"
+    class="standartklasse"
+  />
+</div>
