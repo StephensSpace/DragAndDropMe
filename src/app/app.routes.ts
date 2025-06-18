@@ -4,5 +4,5 @@ import { LobbyComponent } from './lobby/lobby.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent }, // Startseite
-  { path: ':id', component: LobbyComponent }, // Dynamische Route für die Lobby
+  { path: 'lobby/:id', component: LobbyComponent }, // Dynamische Route für die Lobby
 ];

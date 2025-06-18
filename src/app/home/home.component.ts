@@ -9,15 +9,15 @@ import { Router } from '@angular/router';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-   constructor(
+  constructor(
     private firestore: FirebaseService,
     private router: Router
-  ) {}
+  ) { }
 
 
-startLobby() {
+  startLobby() {
     this.firestore.createLobby().then((lobbyId: string) => {
-      this.router.navigate([lobbyId]);
+      this.router.navigate(['lobby', lobbyId]);
     });
   }
 }

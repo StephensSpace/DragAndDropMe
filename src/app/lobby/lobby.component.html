@@ -8,12 +8,12 @@
 </app-overlay-url>
 
 
-<div *ngFor="let p of gameData?.players; let i = index">
+<div *ngFor="let p of players; let i = index">
   <input
     type="text"
     [readonly]="i !== currentPlayerIndex"
-    [ngModel]="i === currentPlayerIndex ? localName : p.name"
-    (ngModelChange)="i === currentPlayerIndex ? localName = $event : null"
+    [ngModel]="i === currentPlayerIndex ? localNames[i] : p?.name"
+    (ngModelChange)="onNameChange($event, i)"
     (blur)="i === currentPlayerIndex ? saveName(i) : null"
     class="standartklasse"
   />

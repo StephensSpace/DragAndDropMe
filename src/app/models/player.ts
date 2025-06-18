@@ -3,7 +3,7 @@ export class Player {
   name: string = 'Player';  
   color: string = 'red';
   score: number = 0;
-  inLobby: boolean = false;
+  inLobby: boolean = false;  // <--- NEU
 
   constructor(init?: Partial<Player>) {
     Object.assign(this, init);
