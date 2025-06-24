@@ -6,6 +6,8 @@ import { OverlayUrlComponent } from '../overlay-url/overlay-url.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Player } from '../models/player';
+import { Observable } from 'rxjs';
+import { GameWithPlayers } from '../models/GameWithPlayers';
 
 @Component({
   selector: 'app-lobby',
@@ -14,15 +16,14 @@ import { Player } from '../models/player';
   styleUrl: './lobby.component.scss'
 })
 export class LobbyComponent {
-  private unsubscribeFn?: () => void;
-  currentPlayerIndex: number = -1;
-  overlayVisible: boolean = false;
-  gameData: Game | undefined;
-  ID: string = "";
-  players: (Player | null)[] = [];
-  localNames: { [index: number]: string } = {};
+  players$!: Observable<(Player | null)[]>;
+  game$!: Observable<GameWithPlayers>;
+  currentPlayerIndex = -1;
+  overlayVisible = false;
+  ID = '';
 
-  constructor(private firestore: FirebaseService,
+  constructor(
+    private firestore: FirebaseService,
     private router: Router,
     private route: ActivatedRoute
   ) { }
@@ -30,72 +31,59 @@ export class LobbyComponent {
   ngOnInit(): void {
     const gameId = this.route.snapshot.paramMap.get('id');
     if (!gameId) {
-      console.warn('Keine Game-ID gefunden');
       this.router.navigate(['/']);
       return;
     }
+
     this.ID = gameId;
-    // ZUERST: Spielerrolle zuweisen (setzt currentPlayerIndex)
+    this.players$ = this.firestore.getPlayersObservable(this.ID);
+    this.game$ = this.firestore.getGameObservable(this.ID);
+
     this.assignPlayerRole(gameId);
-    // DANACH: Auf Game-Daten hören
-    this.unsubscribeFn = this.firestore.subscribeToGame(gameId, (data) => {
-      console.log('Empfangene Spieldaten:', data, this.localNames, this.currentPlayerIndex);
-      this.gameData = data;
-    });
   }
+
+  onNameChange(name: string, index: number, playerId: string) {
+  if (!playerId) return;
+  this.firestore.updatePlayerData(this.ID, playerId, { name });
+}
+
+  saveName(i: number, name: string) {
+    if (!name || i !== this.currentPlayerIndex) return;
+    const playerId = `${i}`; // oder aus Player[] wenn vorhanden
+    this.firestore.updatePlayerData(this.ID, playerId, { name });
+  }
+
   //if (this.currentPlayerIndex === 0) {
   // this.toggleOverlay();
   //}
-
-
-
-  onNameChange(value: string, i: number) {
-    if (i === this.currentPlayerIndex) {
-      this.localNames[i] = value;
-    }
-  }
-
-  saveName(i: number) {
-    const name = this.localNames[i];
-    if (name) {
-      this.firestore.updateGameDataField(this.ID, `players.${i}.name`, name);
-    }
-  }
 
   toggleOverlay() {
     this.overlayVisible = !this.overlayVisible;
   }
 
   async assignPlayerRole(gameId: string) {
-    // Lade die 4 möglichen Player-Slots aus Firestore
     const playersArray = await this.firestore.loadPlayers(gameId);
-    // Finde den ersten freien Slot (inLobby === false)
+
     for (let i = 0; i < playersArray.length; i++) {
       const player = playersArray[i];
       if (player && !player.inLobby) {
-        // Slot gefunden – Spieler betritt Lobby
         player.inLobby = true;
-        // Aktuellen Index merken (z. B. für UI-Sperre)
         this.currentPlayerIndex = i;
-        // Optional: z. B. Spielername aus lokalem Storage oder Eingabe
-        const name = this.localNames[i] || `Player${i + 1}`;
+
+        // Spielername setzen (aus lokalem Storage oder Default)
+        const name = `Player${i + 1}`;
         player.name = name;
-        // Spieler-Objekt zurück in Firestore schreiben
-        await this.firestore.updatePlayerData(gameId, player.id, player);
-        // Lokales players-Array updaten
-        this.players = playersArray;
-        return; // Aufgabe erledigt
+
+        // Firebase update
+        await this.firestore.updatePlayerData(gameId, player.id, {
+          inLobby: true,
+          name,
+        });
+
+        return;
       }
     }
-    // Falls kein freier Slot gefunden wurde
+
     console.warn('Keine freien Spieler-Slots mehr verfügbar.');
   }
-
-  ngOnDestroy(): void {
-    if (this.unsubscribeFn) {
-      this.unsubscribeFn(); // sauber vom Listener abmelden beim Verlassen der Komponente
-    }
-  }
-
-
 }

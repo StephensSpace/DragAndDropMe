@@ -8,13 +8,17 @@
 </app-overlay-url>
 
 
-<div *ngFor="let p of players; let i = index">
-  <input
-    type="text"
-    [readonly]="i !== currentPlayerIndex"
-    [ngModel]="i === currentPlayerIndex ? localNames[i] : p?.name"
-    (ngModelChange)="onNameChange($event, i)"
-    (blur)="i === currentPlayerIndex ? saveName(i) : null"
-    class="standartklasse"
-  />
+
+<div *ngIf="players$ | async as players">
+  <div *ngFor="let p of players; let i = index">
+    <input
+      type="text"
+      class="standartklasse"
+      [disabled]="i !== currentPlayerIndex"
+      [readonly]="i !== currentPlayerIndex"
+      [ngModel]="p?.name"
+      (ngModelChange)="p && onNameChange($event, i, p.id)"
+      (blur)="p && i === currentPlayerIndex ? saveName(i, p.name) : null"
+    />
+  </div>
 </div>
