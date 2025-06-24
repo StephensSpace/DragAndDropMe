@@ -21,6 +21,7 @@ export class LobbyComponent {
   currentPlayerIndex = -1;
   overlayVisible = false;
   ID = '';
+  localNames: { [index: number]: string } = {};
 
   constructor(
     private firestore: FirebaseService,
@@ -37,20 +38,32 @@ export class LobbyComponent {
 
     this.ID = gameId;
     this.players$ = this.firestore.getPlayersObservable(this.ID);
+    this.players$.subscribe(players => {
+      this.initializeLocalNames(players);
+    });
     this.game$ = this.firestore.getGameObservable(this.ID);
 
     this.assignPlayerRole(gameId);
   }
 
-  onNameChange(name: string, index: number, playerId: string) {
-  if (!playerId) return;
-  this.firestore.updatePlayerData(this.ID, playerId, { name });
-}
+  initializeLocalNames(players: (Player | null)[]) {
+    players.forEach((p, i) => {
+      if (p && typeof this.localNames[i] === 'undefined') {
+        this.localNames[i] = p.name || `Player${i + 1}`;
+      }
+    });
+  }
 
-  saveName(i: number, name: string) {
-    if (!name || i !== this.currentPlayerIndex) return;
-    const playerId = `${i}`; // oder aus Player[] wenn vorhanden
+  onNameChange(name: string, index: number, playerId: string) {
+    if (!playerId) return;
     this.firestore.updatePlayerData(this.ID, playerId, { name });
+  }
+
+  saveName(i: number, playerId?: string) {
+    const name = this.localNames[i];
+    if (name && playerId) {
+      this.firestore.updatePlayerData(this.ID, playerId, { name });
+    }
   }
 
   //if (this.currentPlayerIndex === 0) {
