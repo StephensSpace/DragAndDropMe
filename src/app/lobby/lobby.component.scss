@@ -1,3 +1,16 @@
 app-overlay-url {
-    margin-bottom: 50px;
+    margin-bottom: 150px;
+}
+
+.active {
+    cursor: pointer;
+}
+
+.deactivated {
+    pointer-events: none;
+}
+
+.checkReady {
+    width: 18px;
+    height: 18px;
 }

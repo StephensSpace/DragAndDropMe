@@ -4,6 +4,7 @@ export class Player {
   color: string = 'red';
   score: number = 0;
   inLobby: boolean = false;  // <--- NEU
+  ready: boolean = false;
 
   constructor(init?: Partial<Player>) {
     Object.assign(this, init);
@@ -15,7 +16,8 @@ export class Player {
       name: this.name,
       color: this.color,
       score: this.score,
-      inLobby: this.inLobby
+      inLobby: this.inLobby,
+      ready: this.ready
     };
   }
 }

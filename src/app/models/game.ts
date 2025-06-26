@@ -3,6 +3,7 @@ export class Game {
   id: string = '';
   name: string = '';
   maxPlayers: number = 4;  // maximale Spieleranzahl
+  allPlayersReady: boolean = false;
 
   constructor(init?: Partial<Game>) {
     Object.assign(this, init);
@@ -12,7 +13,8 @@ export class Game {
     return {
       id: this.id,
       name: this.name,
-      maxPlayers: this.maxPlayers
+      maxPlayers: this.maxPlayers,
+      allPlayersReady: this.allPlayersReady
     };
   }
 }
