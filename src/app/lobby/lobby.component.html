@@ -21,10 +21,16 @@
   </div>
 </div>
 
-<button [ngClass]="{
-  'active': currentPlayerIndex === 0 && (game$ | async)?.allPlayersReady,
-  'deactivated': currentPlayerIndex !== 0 || !(game$ | async)?.allPlayersReady
-}"
->
-Start Game
-</button>
+<ng-container *ngIf="(game$ | async) as game;">
+  <button [ngClass]="{
+    'active': currentPlayerIndex === 0 && game.allPlayersReady,
+    'deactivated': currentPlayerIndex !== 0 || !game.allPlayersReady
+  }"
+  (click)="startGame()">
+    Start
+  </button>
+</ng-container>
+
+<ng-container *ngIf="gameStart">
+  <p>Game starting! Now Route to your Game Component</p>
+</ng-container>

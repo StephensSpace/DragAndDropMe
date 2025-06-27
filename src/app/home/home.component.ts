@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FirebaseService } from '../services/FirebaseService/Firebase';
 import { Router } from '@angular/router';
 

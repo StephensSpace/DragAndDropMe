@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
+import { Firestore, collectionData, docData } from '@angular/fire/firestore';
 import {
-  Firestore,
   collection,
-  collectionData,
   addDoc,
   doc,
   setDoc,
   getDocs,
-  docData
-} from '@angular/fire/firestore';
-import { onSnapshot, updateDoc } from 'firebase/firestore';
-import { Router } from '@angular/router';
+  getDoc,
+  updateDoc
+} from 'firebase/firestore';
 import { Game } from '../../models/game';
 import { Player } from '../../models/player';
 import { GameWithPlayers } from '../../models/GameWithPlayers';
@@ -22,14 +20,14 @@ import { Observable, map } from 'rxjs';
 export class FirebaseService {
   constructor(
     private firestore: Firestore,
-    private router: Router
+
   ) { }
 
   async createLobby(): Promise<string> {
-    const newGame = new Game({ maxPlayers: 4 });
+    const newGame = new Game();
     const docRef = await addDoc(collection(this.firestore, 'Games'), newGame.toJson());
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < newGame.maxPlayers; i++) {
       const player = new Player({
         id: i.toString(),
         name: `Player${i + 1}`,
@@ -42,28 +40,30 @@ export class FirebaseService {
   }
 
   getGameObservable(gameId: string) {
-  const gameDocRef = doc(this.firestore, 'games', gameId);
-  return docData(gameDocRef, { idField: 'id' }) as Observable<GameWithPlayers>;
-}
+    const gameDocRef = doc(this.firestore, 'Games', gameId);
+    return docData(gameDocRef, { idField: 'id' }) as Observable<GameWithPlayers>;
+  }
 
   async loadPlayers(gameId: string): Promise<(Player | null)[]> {
     const snapshot = await getDocs(collection(this.firestore, 'Games', gameId, 'Players'));
+    const gameDocSnap = await getDoc(doc(this.firestore, 'Games', gameId));
+    const game = gameDocSnap.data() as Game;
     const playersFromDb = snapshot.docs.map(doc => doc.data() as Player);
     const playersArray: (Player | null)[] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < game.maxPlayers; i++) {
       playersArray[i] = playersFromDb.find(p => p.id === i.toString()) || null;
     }
     console.log(playersArray)
     return playersArray;
   }
 
-  // ✅ NEU: Players-Observable mit Live-Updates (RxJS)
-  getPlayersObservable(gameId: string): Observable<(Player | null)[]> {
+
+  getPlayersObservable(gameId: string, maxPlayers: number): Observable<(Player | null)[]> {
     const playersRef = collection(this.firestore, 'Games', gameId, 'Players');
     return collectionData(playersRef, { idField: 'id' }).pipe(
       map((players: any[]) => {
         const playersArray: (Player | null)[] = [];
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < maxPlayers; i++) {
           playersArray[i] = players.find(p => p.id === i.toString()) || null;
         }
         return playersArray;
@@ -71,25 +71,16 @@ export class FirebaseService {
     );
   }
 
-  // ✅ Optional: Game + Players kombinieren (falls benötigt)
-  subscribeToGame(gameId: string, callback: (data: GameWithPlayers) => void): () => void {
-    const gameDoc = doc(this.firestore, 'Games', gameId);
-    const unsubscribe = onSnapshot(gameDoc, async (docSnap) => {
-      if (!docSnap.exists()) {
-        console.warn('Spiel nicht gefunden!');
-        this.router.navigate(['/']);
-        return;
-      }
-      const gameData = docSnap.data() as Game;
-      const playersSnapshot = await getDocs(collection(this.firestore, `Games/${gameId}/players`));
-      const players: (Player | null)[] = playersSnapshot.docs.map(doc => doc.data() as Player);
-      const fullData = { ...gameData, players } as unknown as GameWithPlayers;
-      callback(fullData);
-    });
-    return unsubscribe;
+  async getMaxPlayers(gameId: string): Promise<number> {
+    const gameDocRef = doc(this.firestore, 'Games', gameId);
+    const gameSnap = await getDoc(gameDocRef);
+    if (gameSnap.exists()) {
+      const gameData = gameSnap.data() as Game;
+      return gameData.maxPlayers;
+    }
+    return 0;
   }
 
-  // ✅ Wird weiterhin benötigt zum gezielten Schreiben
   updatePlayerData(gameId: string, playerId: string, updatedFields: Partial<Player>) {
     const playerDocRef = doc(this.firestore, 'Games', gameId, 'Players', playerId);
     return updateDoc(playerDocRef, updatedFields);

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FirebaseService } from '../services/FirebaseService/Firebase';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Game } from '../models/game';
 import { OverlayUrlComponent } from '../overlay-url/overlay-url.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +21,7 @@ export class LobbyComponent {
   overlayVisible = false;
   ID = '';
   localNames: { [index: number]: string } = {};
+  gameStart: boolean = false;
 
   constructor(
     private firestore: FirebaseService,
@@ -29,22 +29,23 @@ export class LobbyComponent {
     private route: ActivatedRoute
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const gameId = this.route.snapshot.paramMap.get('id');
     if (!gameId) {
       this.router.navigate(['/']);
       return;
     }
     this.ID = gameId;
-    this.players$ = this.firestore.getPlayersObservable(this.ID);
+    const maxPlayers = await this.firestore.getMaxPlayers(gameId);
+    this.players$ = this.firestore.getPlayersObservable(this.ID, maxPlayers);
     this.players$.subscribe(players => {
       this.initializeLocalNames(players);
     });
-    this.game$ = this.firestore.getGameObservable(this.ID);
+    this.game$ = this.firestore.getGameObservable(this.ID)
     this.assignPlayerRole(gameId).then(() => {
       if (this.currentPlayerIndex === 0) {
         this.toggleOverlay();
-        console.log(this.overlayVisible);
+        console.log(this.overlayVisible, this.game$);
       }
     });
   }
@@ -81,30 +82,32 @@ export class LobbyComponent {
   }
 
   checkAllReady() {
-  this.players$.pipe(take(1)).subscribe(players => {
-    // Filtert nur gültige Player-Objekte mit inLobby = true
-    const lobbyPlayers: Player[] = players.filter(
-      (p): p is Player => this.isPlayer(p) && p.inLobby
-    );
+    this.players$.pipe(take(1)).subscribe(players => {
+      // Filtert nur gültige Player-Objekte mit inLobby = true
+      const lobbyPlayers: Player[] = players.filter(
+        (p): p is Player => this.isPlayer(p) && p.inLobby
+      );
 
-    // Anfangszustand
-    let allReady = false;
+      // Anfangszustand
+      let allReady = false;
 
-    if (lobbyPlayers.length > 0) {
-      allReady = true;
+      if (lobbyPlayers.length > 0) {
+        allReady = true;
 
-      for (const p of lobbyPlayers) {
-        if (!p.ready) {
-          allReady = false;
-          break;
+        for (const p of lobbyPlayers) {
+          if (!p.ready) {
+            allReady = false;
+            break;
+          }
         }
       }
-    }
-
-    // Wenn alle in der Lobby bereit sind, Game-Flag setzen, sonst zurücksetzen
-    this.firestore.updateGameDataField(this.ID, 'allPlayersReady', allReady);
-  });
-}
+      // Wenn alle in der Lobby bereit sind, Game-Flag setzen, sonst zurücksetzen
+      this.firestore.updateGameDataField(this.ID, 'allPlayersReady', allReady);
+      this.game$.pipe(take(1)).subscribe(game => {
+        console.log('🎯 Das ist dein Game-Objekt:', game);
+      });
+    });
+  }
 
   isPlayer(p: Player | null): p is Player {
     return p !== null && p !== undefined;
@@ -112,27 +115,26 @@ export class LobbyComponent {
 
   async assignPlayerRole(gameId: string) {
     const playersArray = await this.firestore.loadPlayers(gameId);
-
     for (let i = 0; i < playersArray.length; i++) {
       const player = playersArray[i];
       if (player && !player.inLobby) {
         player.inLobby = true;
         this.currentPlayerIndex = i;
-
-        // Spielername setzen (aus lokalem Storage oder Default)
         const name = `Player${i + 1}`;
         player.name = name;
-
-        // Firebase update
         await this.firestore.updatePlayerData(gameId, player.id, {
           inLobby: true,
           name,
         });
-
         return;
       }
     }
-
     console.warn('Keine freien Spieler-Slots mehr verfügbar.');
   }
+
+  startGame() {
+    this.gameStart= !this.gameStart
+  }
 }
+
+

@@ -1,8 +1,10 @@
+
+
 export class Game {
   // Spiel-Metadaten
   id: string = '';
   name: string = '';
-  maxPlayers: number = 4;  // maximale Spieleranzahl
+  maxPlayers: number = 8;  // maximale Spieleranzahl
   allPlayersReady: boolean = false;
 
   constructor(init?: Partial<Game>) {
