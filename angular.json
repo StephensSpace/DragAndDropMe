@@ -31,7 +31,8 @@
                 "input": "public"
               }
             ],
-            "styles": [
+            "styles": [ 
+              "primeicons/primeicons.css",
               "src/styles.scss"
             ],
             "scripts": []

@@ -1,1 +1,26 @@
-<button (click)="startLobby()">Lobby erstellen</button>
+<div class="home-body">
+    <div class="headline">
+    <span class="headline-part drag" [class.animate]="dragAnimated">Drag</span>
+    <span class="headline-part and">And</span>
+    <span class="headline-part drop" [class.animate]="dropAnimated">Drop Me</span>
+  </div>
+    
+   <p-dialog header="Start menu" [modal]="false" [(visible)]="visible" [style]="{
+    width: '28rem',
+    height: '40rem',
+    backgroundImage: 'url(' + '/menuH.jpg' + ')',
+    backgroundSize: '100% 100%',
+    backgroundPosition: 'center'
+  }"
+  closable="false"
+  draggable="false"
+  styleClass="start-menu animate-slide"
+  resizable="false"
+  [transitionOptions]="''"
+  (onShow)="onShow()"
+ >
+<p-button label="Lobby erstellen" [style]="{width: '12rem', marginLeft: '-10px'}" (onClick)="startLobby()"></p-button>
+   </p-dialog>
+</div>
+
+

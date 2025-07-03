@@ -1,0 +1,7 @@
+<div class="overlay-background" 
+     [style.backgroundImage]="backgroundImage ? 'url(' + backgroundImage + ')' : null"
+     [style.width.px]="width" 
+     [style.height.px]="height"
+     (click)="$event.stopPropagation()">
+  <ng-content></ng-content>  <!-- Hier kommt dein variabler Content rein -->
+</div>

@@ -130,6 +130,7 @@ export class LobbyComponent {
       }
     }
     console.warn('Keine freien Spieler-Slots mehr verfügbar.');
+    this.router.navigate(['/']);  // Umleitung zur Home-Komponente
   }
 
   startGame() {

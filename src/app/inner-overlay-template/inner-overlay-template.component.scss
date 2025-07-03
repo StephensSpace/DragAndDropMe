@@ -1,0 +1,8 @@
+@use '../../mixins.scss';
+
+.overlay-background {
+    @include mixins.background-cover('/menuV.jpg', center);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

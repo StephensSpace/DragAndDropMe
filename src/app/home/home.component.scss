@@ -1,0 +1,67 @@
+@use '../../mixins.scss' as mixins;
+
+.home-body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    @include mixins.background-cover('/dragback2.png');
+    overflow: hidden;
+}
+
+.headline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-size: 256px;
+  font-weight: bold;
+  color: gold;
+  z-index: 1;
+}
+
+/* Teile der Headline vorbereiten */
+.headline-part {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+/* Animierte Teile */
+.headline-part.drag.animate {
+  animation: flyInLeft 1s ease-out forwards;
+}
+
+.headline-part.drop.animate {
+  animation: flyInRight 1s ease-out forwards;
+}
+
+.headline-part.and {
+  opacity: 1; /* And bleibt sichtbar */
+  transform: scale(1);
+  text-align: center;
+}
+
+/* Keyframes */
+@keyframes flyInLeft {
+  from {
+    transform: translateX(-150%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flyInRight {
+  from {
+    transform: translateX(150%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}

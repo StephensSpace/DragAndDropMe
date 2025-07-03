@@ -1,1 +1,76 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'assets/primeng/lara-light/amber/theme.scss';
+
+:root {
+    --p-dialog-border-color: pink;
+    --p-dialog-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    --p-dialog-color: #000;
+
+    /* Textfarbe */
+    .p-dialog-header {
+        background-color: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(4px);
+    }
+
+    .p-dialog-content {
+        background-color: unset !important;
+    }
+}
+
+body,
+html {
+    margin: 0;
+}
+
+.start-menu {
+    overflow: hidden;
+    border-radius: 12px;
+
+    .p-dialog-header {
+        justify-content: center;
+        text-align: center;
+
+
+        span {
+            font-size: 4.4rem;
+            white-space: nowrap;
+        }
+    }
+
+    .p-dialog-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        /* falls du später noch mehr Content übereinander legst */
+    }
+}
+
+.animate-slide .p-dialog {
+  animation: slideUp 300ms ease-out forwards;
+}
+
+.animate-slide-leave .p-dialog {
+  animation: slideDown 300ms ease-in forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
