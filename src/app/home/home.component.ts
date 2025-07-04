@@ -21,6 +21,13 @@ export class HomeComponent {
   visible: boolean = false;
   dragAnimated = false;
   dropAnimated = false;
+  menuStyle: {} = {
+    width: '28rem',
+    height: '40rem',
+    backgroundImage: 'url(' + '/menuH.jpg' + ')',
+    backgroundSize: '100% 100%',
+    backgroundPosition: 'center'
+  };
 
   ngOnInit() {
     setTimeout(() => {
@@ -31,7 +38,7 @@ export class HomeComponent {
 
     setTimeout(() => {
       this.visible = true;
-    }, 2500);
+    }, 2000);
   }
 
   startLobby() {

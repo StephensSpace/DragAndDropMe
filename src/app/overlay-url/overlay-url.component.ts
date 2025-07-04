@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-overlay-url',
-  imports: [],
+  imports: [InputTextModule],
   templateUrl: './overlay-url.component.html',
   styleUrl: './overlay-url.component.scss'
 })
@@ -10,7 +11,8 @@ export class OverlayUrlComponent {
   @Output() close = new EventEmitter<void>();
   @Input() gameId!: string;
 
-  closeOverlay(){
-    this.close.emit();
+  selectAll(event: FocusEvent) {
+    const input = event.target as HTMLInputElement;
+    input.select();
   }
 }

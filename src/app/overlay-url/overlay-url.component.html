@@ -1,2 +1,8 @@
 <p>Share this Link with your Friends:</p>
-<input readonly [value]="'https://deinspiel.de/lobby/' + gameId" style="margin-bottom: 50px; width: 308px;">
+<input
+  pInputText
+  type="text"
+  [value]="'https://deinspiel.de/lobby/' + gameId"
+  readonly
+  style="margin-bottom: 50px; width: 100%;" 
+  (focus)="selectAll($event)"/>

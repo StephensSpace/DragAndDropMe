@@ -1,36 +1,41 @@
-<h1>Game Lobby</h1>
+<div class="home-body">
+  <p-button class="glow-button" label="Share Link" [style]="{width: '12rem', marginLeft: '-10px'}" (onClick)="toggleOverlay()" *ngIf="currentPlayerIndex == 0"></p-button>
+  <p-dialog header="Game Lobby" [modal]="false" [(visible)]="visible" [style]="lobbyStyle" closable="false"
+    draggable="false" styleClass="start-menu animate-slide" resizable="false" [transitionOptions]="'500ms'">
 
-
-<app-overlay-url *ngIf="overlayVisible" [gameId]="ID" (close)="toggleOverlay()">
-</app-overlay-url>
-
-<div *ngIf="players$ | async as players">
-  <div *ngFor="let p of players; let i = index">
-    <input type="text" class="standartklasse" [disabled]="i !== currentPlayerIndex"
-      [readonly]="i !== currentPlayerIndex" [ngModel]="i === currentPlayerIndex ? localNames[i] : p?.name"
-      (ngModelChange)="
+    <div *ngIf="players$ | async as players">
+      <div *ngFor="let p of players; let i = index">
+        <input pInputText type="text" class="standartklasse" [disabled]="i !== currentPlayerIndex"
+          [readonly]="i !== currentPlayerIndex" [ngModel]="i === currentPlayerIndex ? localNames[i] : p?.name"
+          (ngModelChange)="
         i === currentPlayerIndex
           ? localNames[i] = $event
           : (p && p.id ? onNameChange($event, i, p.id) : null)
       " (blur)="i === currentPlayerIndex ? saveName(i, p?.id) : null" />
-    <button (click)="toggleReady(p)"
-      [ngClass]="{ 'active': currentPlayerIndex === i, 'deactivated': currentPlayerIndex !== i }">
-      Ready
-    </button>
-    <img src="/greenCheck.png" class="checkReady" *ngIf="p?.ready">
-  </div>
-</div>
+        <button (click)="toggleReady(p)"
+          [ngClass]="{ 'active': currentPlayerIndex === i, 'deactivated': currentPlayerIndex !== i }">
+          Ready
+        </button>
+        <img src="/greenCheck.png" class="checkReady" *ngIf="p?.ready">
+      </div>
+    </div>
 
-<ng-container *ngIf="(game$ | async) as game;">
-  <button [ngClass]="{
+    <ng-container *ngIf="(game$ | async) as game;">
+      <button [ngClass]="{
     'active': currentPlayerIndex === 0 && game.allPlayersReady,
     'deactivated': currentPlayerIndex !== 0 || !game.allPlayersReady
-  }"
-  (click)="startGame()">
-    Start
-  </button>
-</ng-container>
+  }" (click)="startGame()">
+        Start
+      </button>
+    </ng-container>
 
-<ng-container *ngIf="gameStart">
-  <p>Game starting! Now Route to your Game Component</p>
-</ng-container>
+    <ng-container *ngIf="gameStart">
+      <p>Game starting! Now Route to your Game Component</p>
+    </ng-container>
+  </p-dialog>
+  <p-dialog header="Lobby-URL" [modal]="true" [(visible)]="overlayVisible" [style]="overlayStyle" closable="true"
+    draggable="false" styleClass="overlay-menu animate-slide" resizable="false" [transitionOptions]="'500ms'">
+    <app-overlay-url [gameId]="ID">
+    </app-overlay-url>
+  </p-dialog>
+</div>

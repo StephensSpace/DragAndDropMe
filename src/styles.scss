@@ -1,48 +1,63 @@
-@import 'assets/primeng/lara-light/amber/theme.scss';
+@use './fonts.scss';
+@use 'primeicons/primeicons.css';
+@use 'assets/primeng/lara-light/amber/theme.scss';
+@use 'primeng/resources/primeng.min.css'; 
+
 
 :root {
-    --p-dialog-border-color: pink;
-    --p-dialog-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    --p-dialog-color: #000;
+  --font-main: 'Orbitron', sans-serif;
+  --p-dialog-border-color: pink;
+  --p-dialog-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  --p-dialog-color: #000;
 
-    /* Textfarbe */
-    .p-dialog-header {
-        background-color: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(4px);
-    }
+  /* Textfarbe */
+  .p-dialog-header {
+    background-color: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+  }
 
-    .p-dialog-content {
-        background-color: unset !important;
-    }
+  .p-dialog-content {
+    background-color: unset !important;
+  }
 }
 
 body,
 html {
-    margin: 0;
+  margin: 0;
+  font-family: var(--font-main) !important;
+}
+
+.overlay-menu {
+    .p-dialog-header {
+    justify-content: space-between;
+    text-align: center;
+    color: #8B0000;
+}
 }
 
 .start-menu {
-    overflow: hidden;
-    border-radius: 12px;
+  overflow: hidden;
+  border-radius: 12px;
 
-    .p-dialog-header {
-        justify-content: center;
-        text-align: center;
+  .p-dialog-header {
+    justify-content: center;
+    text-align: center;
+    color: #8B0000;
 
 
-        span {
-            font-size: 4.4rem;
-            white-space: nowrap;
-        }
+    span {
+      font-size: 4.4rem;
+      white-space: nowrap;
     }
+  }
 
-    .p-dialog-content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        /* falls du später noch mehr Content übereinander legst */
-    }
+  .p-dialog-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* falls du später noch mehr Content übereinander legst */
+  }
 }
 
 .animate-slide .p-dialog {
@@ -58,6 +73,7 @@ html {
     transform: translateY(100%);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -69,8 +85,44 @@ html {
     transform: translateY(0);
     opacity: 1;
   }
+
   to {
     transform: translateY(100%);
     opacity: 0;
+  }
+}
+
+.text-glow {
+  text-shadow:
+    0 0 10px #FFD700,   /* leichter Schimmer */
+    0 0 20px #FFD700,   /* stärkerer Glow */
+    0 0 30px #FF8C00,   /* orangener Übergang */
+    0 0 40px #FF4500,   /* tieferes Orange */
+    0 0 70px #FF0000,   /* roter Glow */
+    0 0 100px #8B0000;  /* dunkler, tiefer Glow */
+  color: #FFD700; /* goldene Schriftfarbe */
+}
+
+.glow-button {
+  text-shadow:
+  0 0 3px rgba(0, 0, 0, 0.7),       // leichter dunkler Schimmer
+  0 0 5px rgba(255, 140, 0, 0.7),   // warmes Orange-Glühen
+  0 0 8px rgba(255, 69, 0, 0.6);    // stärkeres Rot-Orange
+  box-shadow:
+    0 0 10px #FFD700,
+    0 0 20px #FF8C00,
+    0 0 30px #FF4500,
+    0 0 40px #FF0000;
+
+  transition: box-shadow 0.3s ease, text-shadow 0.3s ease;
+
+  &:hover,
+  &:focus {
+    box-shadow:
+      0 0 20px 5px #FFD700,
+      0 0 40px 10px #FF8C00,
+      0 0 60px 15px #FF4500,
+      0 0 80px 20px #FF0000;
+    outline: none;
   }
 }

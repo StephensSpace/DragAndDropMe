@@ -7,10 +7,14 @@ import { FormsModule } from '@angular/forms';
 import { Player } from '../models/player';
 import { Observable, take } from 'rxjs';
 import { GameWithPlayers } from '../models/GameWithPlayers';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+
 
 @Component({
   selector: 'app-lobby',
-  imports: [OverlayUrlComponent, CommonModule, FormsModule],
+  imports: [OverlayUrlComponent, CommonModule, FormsModule, DialogModule, ButtonModule, InputTextModule],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.scss'
 })
@@ -22,6 +26,21 @@ export class LobbyComponent {
   ID = '';
   localNames: { [index: number]: string } = {};
   gameStart: boolean = false;
+  visible: boolean = true;
+  lobbyStyle: {} = {
+    width: '28rem',
+    height: '40rem',
+    backgroundImage: 'url(' + '/menuH.jpg' + ')',
+    backgroundSize: '100% 100%',
+    backgroundPosition: 'center'
+  };
+  overlayStyle: {} = {
+    width: '24rem',
+    height: '18rem',
+    backgroundImage: 'url(' + '/menuV.jpg' + ')',
+    backgroundSize: '100% 100%',
+    backgroundPosition: 'center'
+  };
 
   constructor(
     private firestore: FirebaseService,
@@ -134,7 +153,7 @@ export class LobbyComponent {
   }
 
   startGame() {
-    this.gameStart= !this.gameStart
+    this.gameStart = !this.gameStart
   }
 }
 
