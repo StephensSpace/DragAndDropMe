@@ -23,7 +23,7 @@ export class LobbyComponent {
   game$!: Observable<GameWithPlayers>;
   currentPlayerIndex = -1;
   overlayVisible = false;
-  ID = '';
+  ID: string = '';
   localNames: { [index: number]: string } = {};
   gameStart: boolean = false;
   visible: boolean = true;
@@ -61,12 +61,34 @@ export class LobbyComponent {
       this.initializeLocalNames(players);
     });
     this.game$ = this.firestore.getGameObservable(this.ID)
-    this.assignPlayerRole(gameId).then(() => {
-      if (this.currentPlayerIndex === 0) {
-        this.toggleOverlay();
-        console.log(this.overlayVisible, this.game$);
-      }
-    });
+    if (await this.checkLocalStorage()) {
+      this.checkPlayerOne()
+    } else {
+      await this.assignPlayerRole(gameId);
+      this.checkPlayerOne();
+    }; 
+    
+  }
+
+  async checkLocalStorage() {
+    const rawData = localStorage.getItem(this.ID);
+    if (rawData !== null) {
+      const loggedUser: { curentIndex: number, inLobby: boolean } = JSON.parse(rawData);
+      this.currentPlayerIndex = loggedUser.curentIndex;
+      const playersArray = await this.firestore.loadPlayers(this.ID);
+      const player: Player | null = playersArray[this.currentPlayerIndex]
+      this.setNameAndSaveInitial(loggedUser.curentIndex, player!);
+      return true
+    } else {
+      return false
+    }
+  }
+
+  checkPlayerOne() {
+    if (this.currentPlayerIndex === 0) {
+      this.toggleOverlay();
+      console.log(this.overlayVisible, this.game$);
+    }
   }
 
   initializeLocalNames(players: (Player | null)[]) {
@@ -95,6 +117,14 @@ export class LobbyComponent {
     const newReadyState = !player.ready;
     this.firestore.updatePlayerData(this.ID, player.id, { ready: newReadyState }).then(() => this.checkAllReady());
   }
+
+  saveSlotToLocalStorage() {
+  localStorage.setItem(this.ID, JSON.stringify({
+    curentIndex: this.currentPlayerIndex,
+    inLobby: true
+  }));
+}
+
 
   toggleOverlay() {
     this.overlayVisible = !this.overlayVisible;
@@ -139,17 +169,22 @@ export class LobbyComponent {
       if (player && !player.inLobby) {
         player.inLobby = true;
         this.currentPlayerIndex = i;
-        const name = `Player${i + 1}`;
-        player.name = name;
-        await this.firestore.updatePlayerData(gameId, player.id, {
-          inLobby: true,
-          name,
-        });
+        this.setNameAndSaveInitial(i, player)
+        this.saveSlotToLocalStorage()
         return;
       }
     }
     console.warn('Keine freien Spieler-Slots mehr verfügbar.');
     this.router.navigate(['/']);  // Umleitung zur Home-Komponente
+  }
+
+  async setNameAndSaveInitial(i: number, player: Player) {
+    const name = `Player${i + 1}`;
+    player.name = name;
+    await this.firestore.updatePlayerData(this.ID, player.id, {
+      inLobby: true,
+      name,
+    });
   }
 
   startGame() {
